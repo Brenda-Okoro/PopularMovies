@@ -6,12 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.example.brenda.popularmovies.MainActivity;
 import com.example.brenda.popularmovies.R;
 import com.example.brenda.popularmovies.models.Movie;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -24,9 +23,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ImageViewHol
     private ListItemClickListener mOnClickListener;
     private static int viewHolderCount;
     private LayoutInflater mLayoutInflater;
-    private int mNumberItems;
     List<Movie> movies;
     Context context;
+
+    public List<Movie> getData() {
+        return movies;
+    }
 
 
     /**
@@ -36,13 +38,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ImageViewHol
         void onListItemClick(int clickedItemIndex);
     }
 
-    public MovieAdapter(int numberOfItems, ListItemClickListener listener) {
-        mNumberItems = numberOfItems;
-        mOnClickListener = listener;
-        viewHolderCount = 0;
-    }
-
-    public MovieAdapter(Context context, List<Movie> movies) {
+    public MovieAdapter(ListItemClickListener itemClickListener, Context context, List<Movie> movies) {
+        mOnClickListener = itemClickListener;
         this.movies = movies;
         this.context = context;
         mLayoutInflater = LayoutInflater.from(context);
@@ -71,33 +68,38 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ImageViewHol
         holder.bind(position);
     }
 
-
     @Override
     public int getItemCount() {
-        return mNumberItems;
+        if (movies == null)
+            return 0;
+        return movies.size();
     }
 
-    class ImageViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
+    public void setData(List<Movie> movies) {
+        this.movies.addAll(movies);
+        notifyDataSetChanged();
+    }
+
+    class ImageViewHolder extends RecyclerView.ViewHolder {
         ImageView listItemImageView;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
 
             listItemImageView = (ImageView) itemView.findViewById(R.id.movie_posters_view);
-            itemView.setOnClickListener(this);
         }
 
-        void bind(int listIndex) {
-            //listItemImageView.setImageURI();
-        }
+        void bind(final int position) {
 
+            Movie movie = movies.get(position);
+            Picasso.with(context).load(context.getString(R.string.movie_image_base_url) + movie.getPosterPath()).into(listItemImageView);
 
-        @Override
-        public void onClick(View v) {
-            int clickedPosition = getAdapterPosition();
-            mOnClickListener.onListItemClick(clickedPosition);
-
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnClickListener.onListItemClick(position);
+                }
+            });
         }
     }
 }

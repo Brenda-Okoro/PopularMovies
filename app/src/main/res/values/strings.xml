@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">PopularMovies</string>
     <string name="movie_intent_key">movie</string>
+    <string name="total_rating">/10</string>
+    <string name="no_network_message">Your phone is currently not connected to the internet, please connect and try again</string>
+    <string name="movie_poster_data_key">movies.key</string>
+    <string name="base_url">http://api.themoviedb.org/3/</string>
+    <!-- Get an API from https://www.themoviedb.org/settings/api and insert here -->
+    <string name="api_key">c9323c12544c8bcb0e68a1361ca4561f</string>
+    <string name="movie_image_base_url">http://image.tmdb.org/t/p/w185/</string>
+    <string name="sort_by_most_popular">Popular movies</string>
+    <string name="sort_by_highest_rated">Top-Rated movies</string>
+    <string name="overview_data_key">overview.key</string>
 </resources>

@@ -14,6 +14,18 @@ public class Movie implements Parcelable {
     @SerializedName("id")
     private long id;
 
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", posterPath='" + posterPath + '\'' +
+                ", originalTitle='" + originalTitle + '\'' +
+                ", overview='" + overview + '\'' +
+                ", voteAverage=" + voteAverage +
+                ", releaseDate='" + releaseDate + '\'' +
+                '}';
+    }
+
     @SerializedName("poster_path")
     private String posterPath;
 
@@ -38,7 +50,8 @@ public class Movie implements Parcelable {
         id = in.readLong();
     }
 
-    public Movie(){}
+    public Movie() {
+    }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
