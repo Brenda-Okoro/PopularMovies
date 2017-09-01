@@ -76,6 +76,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ImageViewHol
     }
 
     public void setData(List<Movie> movies) {
+        this.movies.clear();
+
         this.movies.addAll(movies);
         notifyDataSetChanged();
     }

@@ -30,6 +30,8 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import static android.view.View.GONE;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             if (savedInstanceState != null) {
                 if (savedInstanceState.containsKey(getString(R.string.movie_poster_data_key))) {
                     movies = savedInstanceState.getParcelableArrayList(getString(R.string.movie_poster_data_key));
-                    showMovies(null);
+                    mAdapter.setData(movies);
                 }
             } else {
                 showMovies(MovieFilter.POPULAR);
@@ -105,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showMovies(MovieFilter filter) {
         progressBar.setVisibility(View.VISIBLE);
+        mImageList.setVisibility(View.GONE);
         subscription = MovieClient.getInstance(this)
                 .getMovies(filter)
                 .subscribeOn(Schedulers.io())
@@ -112,18 +115,23 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(new Observer<MovieListResponse>() {
                     @Override
                     public void onCompleted() {
-                        progressBar.setVisibility(View.GONE);
+                        Log.d(TAG, "onCompleted was called ");
+
+                        progressBar.setVisibility(GONE);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        progressBar.setVisibility(View.GONE);
+                        Log.e(TAG, "onError was called "+e);
+
+                        progressBar.setVisibility(GONE);
                     }
 
                     @Override
                     public void onNext(MovieListResponse movieListResponse) {
                         Log.d(TAG, "We got this from the server " + movieListResponse.getMovies().toString());
                         mAdapter.setData(movieListResponse.getMovies());
+                        mImageList.setVisibility(View.VISIBLE);
                     }
                 });
     }
