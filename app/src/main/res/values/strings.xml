@@ -11,4 +11,6 @@
     <string name="sort_by_most_popular">Popular movies</string>
     <string name="sort_by_highest_rated">Top-Rated movies</string>
     <string name="overview_data_key">overview.key</string>
+    <string name="trailer_data_key">trailer.key</string>
+    <string name="review_data_key">review.key</string>
 </resources>
