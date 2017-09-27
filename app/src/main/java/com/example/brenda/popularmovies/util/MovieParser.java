@@ -2,11 +2,9 @@ package com.example.brenda.popularmovies.util;
 
 import android.database.Cursor;
 import android.util.Log;
-
 import com.example.brenda.popularmovies.data.FavoriteListContract;
 import com.example.brenda.popularmovies.models.Movie;
 import com.example.brenda.popularmovies.models.Review;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +35,7 @@ public class MovieParser {
             String releaseDate = movieJSONObject.getString(KEY_RELEASE_DATE);
             double userRating = movieJSONObject.getDouble(KEY_USER_RATING);
 
-            movie = new Movie(id, thumbnailURL, title, synopsis, userRating, releaseDate);
+            movie = new Movie();
         }catch (JSONException e){
             Log.e(TAG, e.getMessage());
         }
@@ -69,7 +67,7 @@ public class MovieParser {
                 FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING
         ));
 
-        movie = new Movie(id, thumbnailURL, title, synopsis, userRating, releaseDate);
+        movie = new Movie();
 
         return movie;
 
@@ -88,7 +86,7 @@ public class MovieParser {
 
         }
 
-        return new Review(author, content);
+        return new Review();
     }
 
 }

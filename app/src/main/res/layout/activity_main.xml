@@ -10,9 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:textSize="20sp"
-        tools:listitem="@layout/image_list_item">
+        tools:listitem="@layout/movie_list_item">
 
     </android.support.v7.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ProgressBar
         android:id="@+id/progressBar"

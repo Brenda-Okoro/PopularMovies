@@ -56,10 +56,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="15dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginLeft="35dp"
                     android:textColor="@color/white"
                     android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/favorite_view"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignBottom="@+id/movie_title"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="35dp"
+                    android:background="@drawable/ic_star_favorite"
+                    android:visibility="gone"
+                    />
+
 
                 <TextView
                     android:id="@+id/movie_ratings"
@@ -142,4 +154,16 @@
                 android:textSize="18sp" />
         </RelativeLayout>
     </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mark_as_favourite_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_star_favorite"
+        app:backgroundTint="@color/light_grey"
+        app:layout_anchor="@id/nested_scrollview"
+        app:layout_anchorGravity="bottom|right|end" />
+
 </android.support.design.widget.CoordinatorLayout>

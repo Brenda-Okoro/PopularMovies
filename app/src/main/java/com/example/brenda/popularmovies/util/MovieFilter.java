@@ -5,5 +5,5 @@ package com.example.brenda.popularmovies.util;
  */
 
 public enum MovieFilter {
-    POPULAR, HIGH_RATED
+    POPULAR, HIGH_RATED, FAVORITE
 }

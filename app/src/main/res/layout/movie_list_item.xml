@@ -2,11 +2,12 @@
 <ImageView android:id="@+id/movie_posters_view"
     android:layout_width="match_parent"
     android:scaleType="fitXY"
-    android:layout_height="200dp"
+    android:layout_height="wrap_content"
     android:layout_gravity="end"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
     android:layout_marginTop="5dp"
+    android:adjustViewBounds="true"
     android:src="@mipmap/ic_launcher_pix"
     xmlns:android="http://schemas.android.com/apk/res/android" />
 

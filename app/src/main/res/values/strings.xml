@@ -10,7 +10,11 @@
     <string name="movie_image_base_url">http://image.tmdb.org/t/p/w185/</string>
     <string name="sort_by_most_popular">Popular movies</string>
     <string name="sort_by_highest_rated">Top-Rated movies</string>
+    <string name="sort_by_favorite">Favorite movies</string>
     <string name="overview_data_key">overview.key</string>
     <string name="trailer_data_key">trailer.key</string>
     <string name="review_data_key">review.key</string>
+    <string name="info_no_favorite_movie">No favorite movies added</string>
+    <string name="error_unable_to_fetch_favorite_movies">Unable to fetch favorite movies at the moment</string>
+    <string name="add_favorite_movie_toast_message">Added to favorite movies</string>
 </resources>

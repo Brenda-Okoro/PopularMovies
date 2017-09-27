@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.example.brenda.popularmovies.R;
 import com.example.brenda.popularmovies.models.MovieListResponse;
+import com.example.brenda.popularmovies.models.ReviewListResponse;
+import com.example.brenda.popularmovies.models.TrailerListResponse;
 import com.example.brenda.popularmovies.util.MovieFilter;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -46,5 +48,13 @@ public class MovieClient {
             return movieService.getHighRatedMovies(apiKey);
         }
         return movieService.getPopularMovies(apiKey);
+    }
+
+    public Observable<TrailerListResponse> getTrailers(long movieId){
+        return movieService.getTrailers(movieId, apiKey);
+    }
+
+    public Observable<ReviewListResponse> getReviews(long movieId){
+        return movieService.getReviews(movieId, apiKey);
     }
 }
