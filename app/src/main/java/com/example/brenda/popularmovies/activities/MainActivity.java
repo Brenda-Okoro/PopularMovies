@@ -1,12 +1,7 @@
 package com.example.brenda.popularmovies.activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,24 +12,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.example.brenda.popularmovies.R;
-import com.example.brenda.popularmovies.adapters.FavoriteMovieAdapter;
 import com.example.brenda.popularmovies.adapters.MovieAdapter;
-import com.example.brenda.popularmovies.data.FavoriteListContract;
+import com.example.brenda.popularmovies.fragments.FavoriteFragment;
 import com.example.brenda.popularmovies.models.Movie;
 import com.example.brenda.popularmovies.models.MovieListResponse;
 import com.example.brenda.popularmovies.networks.MovieClient;
 import com.example.brenda.popularmovies.util.MovieFilter;
-import com.example.brenda.popularmovies.util.MovieParser;
 import com.example.brenda.popularmovies.util.NetworkUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -43,7 +32,7 @@ import rx.schedulers.Schedulers;
 import static android.view.View.GONE;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity {
     public static final String KEY_MOVIES = "movies";
     public static final String KEY_SELECTED_MOVIE = "mMovie";
     private static final String KEY_ACTION_BAR_TITLE = "title";
@@ -58,8 +47,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private Subscription subscription;
     private TextView mErrorMessageTextView;
     private List<Movie> movies;
-    FavoriteMovieAdapter mFavoriteMovieAdapter;
-    Cursor mFavoriteMoviesCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,18 +74,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (!isPhoneConnectedToInternet()) {
             showMessage(R.string.no_network_message);
 
-        } else {
-
-            if (actionBarTitleWasSaved(savedInstanceState)) {
-                String actionBarTitle = savedInstanceState.getString(KEY_ACTION_BAR_TITLE);
-                setActionBarTitle(actionBarTitle);
-            }
-
-            if (favoriteMovieCursorWasSaved(savedInstanceState)) {
-                mAdapter = null;
-                getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
-            } else {
+//        } else {
+//
+//            if (actionBarTitleWasSaved(savedInstanceState)) {
+//                String actionBarTitle = savedInstanceState.getString(KEY_ACTION_BAR_TITLE);
+//                setActionBarTitle(actionBarTitle);
+//            }
+//
+//            if (favoriteMovieCursorWasSaved(savedInstanceState)) {
+//                mAdapter = null;
+//                getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+//
+//            } else {
                 if (savedInstanceState != null) {
                     if (savedInstanceState.containsKey(getString(R.string.movie_poster_data_key))) {
                         movies = savedInstanceState.getParcelableArrayList(getString(R.string.movie_poster_data_key));
@@ -110,8 +97,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
 
         }
-
-    }
 
     private boolean favoriteMovieCursorWasSaved(Bundle savedInstanceState) {
         return savedInstanceState.containsKey(KEY_FAVORITE_MOVIE_CURSOR);
@@ -186,7 +171,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void sortMoviesByFavorite() {
         String favoriteMovies = getString(R.string.sort_by_favorite);
         setActionBarTitle(favoriteMovies);
-        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        FavoriteFragment favoriteFragment = new FavoriteFragment();
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        android.support.v4.app.FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.main_activity, favoriteFragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -215,96 +205,96 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mErrorMessageTextView.setText(errorMessage);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Movie selectedMovie;
-        boolean currentAdapterIsForFavoriteMovies = (mAdapter == null);
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        Movie selectedMovie;
+//        boolean currentAdapterIsForFavoriteMovies = (mAdapter == null);
+//
+//        if (currentAdapterIsForFavoriteMovies) {
+//            Cursor currentCursor = (Cursor) mFavoriteMovieAdapter.getItem(position);
+//            selectedMovie = MovieParser.parserMovie(currentCursor);
+//
+//
+//        } else {
+//            selectedMovie = mAdapter.getItemCount(position);
+//            getSupportLoaderManager().destroyLoader(LOADER_ID);
+//        }
+//
+//        Context context = this;
+//        Class classToBeStartedViaIntent = MovieDetailActivity.class;
+//        Intent movieDetailsIntent = new Intent(context, classToBeStartedViaIntent);
+//        movieDetailsIntent.putExtra(KEY_SELECTED_MOVIE, selectedMovie);
+//
+//        startActivity(movieDetailsIntent);
+//    }
 
-        if (currentAdapterIsForFavoriteMovies) {
-            Cursor currentCursor = (Cursor) mFavoriteMovieAdapter.getItem(position);
-            selectedMovie = MovieParser.parserMovie(currentCursor);
+//    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        return new CursorLoader(this) {
+//
+//            Cursor favoriteMovieCursor;
+//
+//            @Override
+//            protected void onStartLoading() {
+//                super.onStartLoading();
+//                progressBar.setVisibility(View.VISIBLE);
+//
+//                if (favoriteMovieCursor == null)
+//                    forceLoad();
+//                else
+//                    deliverResult(favoriteMovieCursor);
+//            }
+//
+//            @Override
+//            public Cursor loadInBackground() {
+//
+//                favoriteMovieCursor =
+//                        getContext().getContentResolver().query(
+//                                FavoriteListContract.FavoriteEntry.CONTENT_URI, null,
+//                                null, null, null
+//                        );
+//
+//                return favoriteMovieCursor;
+//            }
+//
+//            @Override
+//            protected void onStopLoading() {
+//                super.onStopLoading();
+//            }
+//        };
+//    }
 
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        progressBar.setVisibility(View.INVISIBLE);
+//        if (data != null) {
+//            int count = data.getCount();
+//            if (count == 0) {
+//                String noFavoriteMoviesInfoMessage = getString(R.string.info_no_favorite_movie);
+//                showErrorMessage(noFavoriteMoviesInfoMessage);
+//            } else {
+//                mFavoriteMoviesCursor = data;
+//                Context context = MainActivity.this;
+//
+//                mFavoriteMovieAdapter = new FavoriteMovieAdapter(context, mFavoriteMoviesCursor);
+//                mAdapter = null;
+//
+//                mMovieList.setAdapter(mFavoriteMovieAdapter);
+//                mFavoriteMovieAdapter.notifyDataSetChanged();
+//
+//            }
+//
+//        } else {
+//            String databaseErrorMessage = getString(R.string.error_unable_to_fetch_favorite_movies);
+//            showErrorMessage(databaseErrorMessage);
+//
+//        }
+//    }
 
-        } else {
-            selectedMovie = mAdapter.getItemCount(position);
-            getSupportLoaderManager().destroyLoader(LOADER_ID);
-        }
-
-        Context context = this;
-        Class classToBeStartedViaIntent = MovieDetailActivity.class;
-        Intent movieDetailsIntent = new Intent(context, classToBeStartedViaIntent);
-        movieDetailsIntent.putExtra(KEY_SELECTED_MOVIE, selectedMovie);
-
-        startActivity(movieDetailsIntent);
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this) {
-
-            Cursor favoriteMovieCursor;
-
-            @Override
-            protected void onStartLoading() {
-                super.onStartLoading();
-                progressBar.setVisibility(View.VISIBLE);
-
-                if (favoriteMovieCursor == null)
-                    forceLoad();
-                else
-                    deliverResult(favoriteMovieCursor);
-            }
-
-            @Override
-            public Cursor loadInBackground() {
-
-                favoriteMovieCursor =
-                        getContext().getContentResolver().query(
-                                FavoriteListContract.FavoriteEntry.CONTENT_URI, null,
-                                null, null, null
-                        );
-
-                return favoriteMovieCursor;
-            }
-
-            @Override
-            protected void onStopLoading() {
-                super.onStopLoading();
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        progressBar.setVisibility(View.INVISIBLE);
-        if (data != null) {
-            int count = data.getCount();
-            if (count == 0) {
-                String noFavoriteMoviesInfoMessage = getString(R.string.info_no_favorite_movie);
-                showErrorMessage(noFavoriteMoviesInfoMessage);
-            } else {
-                mFavoriteMoviesCursor = data;
-                Context context = MainActivity.this;
-
-                mFavoriteMovieAdapter = new FavoriteMovieAdapter(context, mFavoriteMoviesCursor);
-                mAdapter = null;
-
-                mMovieList.setAdapter(mFavoriteMovieAdapter);
-                mFavoriteMovieAdapter.notifyDataSetChanged();
-
-            }
-
-        } else {
-            String databaseErrorMessage = getString(R.string.error_unable_to_fetch_favorite_movies);
-            showErrorMessage(databaseErrorMessage);
-
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//
+//    }
 
 }
 
