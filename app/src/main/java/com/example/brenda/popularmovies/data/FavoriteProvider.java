@@ -11,6 +11,9 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.TABLE_NAME;
 
 /**
  * Created by brenda on 9/24/17.
@@ -20,17 +23,18 @@ public class FavoriteProvider extends ContentProvider {
 
     private FavoriteDbHelper mFavoriteDbHelper;
 
+    private static final String TAG = FavoriteProvider.class.getSimpleName();
     public static final int FAVORITE_MOVIES = 100;
     public static final int FAVORITE_MOVIES_WITH_ID = 101;
 
     private static UriMatcher sUriMatcher = buildUriMatcher();
 
-    public static  UriMatcher buildUriMatcher(){
+    public static UriMatcher buildUriMatcher() {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(FavoriteListContract.AUTHORITY, FavoriteListContract.FAVORITE_MOVIES_PATH, FAVORITE_MOVIES);
-        matcher.addURI(FavoriteListContract.AUTHORITY, FavoriteListContract.FAVORITE_MOVIES_PATH+"/#", FAVORITE_MOVIES_WITH_ID);
+        matcher.addURI(FavoriteListContract.AUTHORITY, FavoriteListContract.FAVORITE_MOVIES_PATH + "/#", FAVORITE_MOVIES_WITH_ID);
 
-        return  matcher;
+        return matcher;
     }
 
     @Override
@@ -52,12 +56,12 @@ public class FavoriteProvider extends ContentProvider {
 
         Cursor returnCursor = null;
 
-        switch (match){
+        switch (match) {
 
             case FAVORITE_MOVIES:
 
-                returnCursor =   db.query(
-                        FavoriteListContract.FavoriteEntry.TABLE_NAME,
+                returnCursor = db.query(
+                        TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -70,12 +74,10 @@ public class FavoriteProvider extends ContentProvider {
             case FAVORITE_MOVIES_WITH_ID:
                 break;
             default:
-                new UnsupportedOperationException("Unknown uri: "+ uri);
+                new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
         returnCursor.setNotificationUri(getContext().getContentResolver(), uri);
-
-
+        Log.d(TAG, "Retrieved " + returnCursor.getCount() + "Favorites from db");
         return returnCursor;
     }
 
@@ -93,25 +95,24 @@ public class FavoriteProvider extends ContentProvider {
 
         int match = sUriMatcher.match(uri);
 
-        Uri  returnUri;
-        switch (match){
+        Uri returnUri = null;
+        switch (match) {
 
             case FAVORITE_MOVIES:
-                long id = db.insert(FavoriteListContract.FavoriteEntry.TABLE_NAME, null, values);
+                long id = db.insert(TABLE_NAME, null, values);
 
-                if(id > 0){
+                if (id > 0) {
                     returnUri = ContentUris.withAppendedId(FavoriteListContract.FavoriteEntry
                             .CONTENT_URI, id);
-                }else {
-                    throw  new SQLiteException("Failed to insert into row");
                 }
 
                 break;
 
             default:
-                throw new UnsupportedOperationException("Unknown uri: "+ uri);
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
 
         }
+        Log.d(TAG, "Successfully inserted " + values + "to db");
 
         getContext().getContentResolver().notifyChange(uri, null);
 
@@ -120,7 +121,24 @@ public class FavoriteProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase database = mFavoriteDbHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case FAVORITE_MOVIES:
+                int noOfRows = database.delete(TABLE_NAME, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return noOfRows;
+
+            case FAVORITE_MOVIES_WITH_ID:
+
+                int noOfRows2 = database.delete(TABLE_NAME, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return noOfRows2;
+            default:
+                throw new IllegalArgumentException("Deletion cannot be done on unknown uri" + uri);
+        }
+
     }
 
     @Override

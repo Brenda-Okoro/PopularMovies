@@ -3,15 +3,13 @@ package com.example.brenda.popularmovies.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import com.example.brenda.popularmovies.R;
-import com.example.brenda.popularmovies.data.FavoriteListContract;
 import com.example.brenda.popularmovies.models.Movie;
-import com.example.brenda.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -22,69 +20,44 @@ import java.util.List;
 
 
 public class FavoriteMovieAdapter extends RecyclerView.Adapter<FavoriteMovieAdapter.ImageViewHolder> {
-    private static final String TAG = FavoriteMovieAdapter.class.getSimpleName();
-    private ListItemClickListener mOnClickListener;
-    private static int viewHolderCount;
-    private LayoutInflater mLayoutInflater;
-    List<Movie> movies;
-    Context context;
-    Cursor cursor;
+    private Cursor mCursor;
+    private final FavoriteMovieAdapter.ListItemClickListener mOnClickListener;
 
-    public List<Movie> getData() {
-        return movies;
+    public FavoriteMovieAdapter(Cursor cursor, FavoriteMovieAdapter.ListItemClickListener mOnClickListener) {
+        this.mOnClickListener = mOnClickListener;
+        swapCursor(cursor);
     }
 
-
-    /**
-     * The interface that receives onClick messages.
-     */
-    public interface ListItemClickListener {
-        void onListItemClick(int clickedItemIndex);
-    }
-
-    public FavoriteMovieAdapter(ListItemClickListener itemClickListener, Context context, List<Movie> movies, Cursor cursor) {
-        mOnClickListener = itemClickListener;
-        this.movies = movies;
-        this.context = context;
-        this.cursor = cursor;
-        mLayoutInflater = LayoutInflater.from(context);
+    public void swapCursor(Cursor cursor) {
+        this.mCursor = cursor;
+        notifyDataSetChanged();
     }
 
     @Override
-    public ImageViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-
-        Context context = viewGroup.getContext();
-        int layoutIdForListItem = R.layout.movie_list_item;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
-
-        View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
-        ImageViewHolder viewHolder = new ImageViewHolder(view);
-
-        viewHolderCount++;
-        Log.d(TAG, "onCreateViewHolder: number of ViewHolders created: "
-                + viewHolderCount);
-        return viewHolder;
+    public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_list_item, parent, false);
+        return new ImageViewHolder(view);
     }
 
-
     @Override
-    public void onBindViewHolder(FavoriteMovieAdapter.ImageViewHolder holder, int position) {
-        Log.d(TAG, "#" + position);
-//        holder.bind(position);
+    public void onBindViewHolder(ImageViewHolder holder, int position) {
+        holder.bind(position);
+    }
+
+    public Movie getItem(int position) {
+        if (position < 0 || position >= getItemCount()) {
+            throw new IllegalArgumentException("Item position is out of adapter's range");
+        } else if (mCursor != null && mCursor.moveToPosition(position)) {
+            return Movie.parseCursorToMovie(mCursor);
+        }
+        return null;
     }
 
     @Override
     public int getItemCount() {
-        if (movies == null)
+        if (mCursor == null)
             return 0;
-        return movies.size();
-    }
-
-    public void setData(List<Movie> movies) {
-        this.movies.clear();
-        this.movies.addAll(movies);
-        notifyDataSetChanged();
+        return mCursor.getCount();
     }
 
     class ImageViewHolder extends RecyclerView.ViewHolder {
@@ -96,38 +69,26 @@ public class FavoriteMovieAdapter extends RecyclerView.Adapter<FavoriteMovieAdap
             listItemImageView = (ImageView) itemView.findViewById(R.id.movie_posters_view);
         }
 
-    public void bind (View convertView, Context context, Cursor cursor) {
-        String thumbnailURL =  getThumbnailURLFrom(cursor);
-        String title = getMoveTitleFrom(cursor);
-        String movieId = getMovieId(cursor);
-        convertView.setTag(movieId);
+        void bind(final int position) {
+            Context context = itemView.getContext();
+            final Movie movie = getItem(position);
+            Picasso.with(context)
+                    .load(context.getString(R.string.movie_image_base_url) + movie.getPosterPath())
+                    .into(listItemImageView);
 
-
-        ImageView posterImageView = (ImageView) convertView.findViewById(R.id.movie_posters_view);
-        posterImageView.setContentDescription(title);
-        String imageBaseURL = NetworkUtils.getPosterImageBaseURL();
-        String imageWidthDescription = "w185";
-        String fullThumbnailURL = imageBaseURL + imageWidthDescription + thumbnailURL;
-        Picasso.with(context).load(fullThumbnailURL).into(posterImageView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnClickListener.onListItemClick(position);
+                }
+            });
+        }
     }
 
-        private String getMoveTitleFrom(Cursor cursor) {
-        return  cursor.getString(cursor.getColumnIndex(
-                FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE
-        ));
-    }
-
-        private String getThumbnailURLFrom(Cursor cursor) {
-        return  cursor.getString(cursor.getColumnIndex(
-                FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL
-        ));
-    }
-
-    public String getMovieId(Cursor cursor) {
-        return  cursor.getString(cursor.getColumnIndex(
-                FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID
-        ));
-    }
-
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface ListItemClickListener {
+        void onListItemClick(int clickedItemIndex);
     }
 }

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.brenda.popularmovies.R;
+import com.example.brenda.popularmovies.data.DataManager;
 import com.example.brenda.popularmovies.data.FavoriteListContract;
 import com.example.brenda.popularmovies.fragments.OverviewFragment;
 import com.example.brenda.popularmovies.fragments.ReviewFragment;
@@ -48,6 +49,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private FloatingActionButton mMarkAsFavorite;
     private NestedScrollView scrollView;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    boolean isCurrentMovieFavourite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +61,38 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         initViews();
         enableActionBar();
-
         loadDataIntoViews(movie);
+        isCurrentMovieFavourite = DataManager.isFavorite(this, movie);
+        updateFABIcon();
+        setUpListener();
     }
+
+    private void updateFABIcon() {
+        if (isCurrentMovieFavourite) {
+            mMarkAsFavorite.setImageResource(R.drawable.ic_favorite_black_24dp);
+        } else {
+            mMarkAsFavorite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+        }
+    }
+
+    private void setUpListener() {
+        mMarkAsFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (isCurrentMovieFavourite) {
+                    DataManager.removeFromFavorites(MovieDetailActivity.this, movie);
+                    isCurrentMovieFavourite = false;
+                    updateFABIcon();
+                } else {
+                    DataManager.addToFavorites(MovieDetailActivity.this, movie);
+                    isCurrentMovieFavourite = true;
+                    updateFABIcon();
+                }
+            }
+        });
+    }
+
 
     private void enableActionBar() {
         setSupportActionBar(toolbar);
@@ -108,12 +139,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         if (scrollView != null) {
             scrollView.setFillViewport(true);
         }
-        mMarkAsFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                insertMovieIntoDatabase();
-            }
-        });
         mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewpager.setPageTransformer(true, new ZoomOutTransformer());
         viewpager.setAdapter(mPagerAdapter);
@@ -172,34 +197,34 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void insertMovieIntoDatabase(){
-
-        ContentValues contentValues = parseMovieIntoContentValues();
-
-        Uri uri = getContentResolver().insert(FavoriteListContract.FavoriteEntry.CONTENT_URI, contentValues);
-
-        if(uri != null){
-            String addedFavoriteMovieToastMessage = getString(R.string.add_favorite_movie_toast_message);
-            Toast.makeText(getBaseContext(),
-                    addedFavoriteMovieToastMessage
-                    , Toast.LENGTH_LONG).show();
-
-        }else {
-            finish();
-        }
-    }
-
-    private ContentValues parseMovieIntoContentValues() {
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE, movie.getOriginalTitle());
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL, movie.getPosterPath());
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_SYNOPSIS, movie.getOverview());
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING, movie.getVoteAverage());
-
-        return contentValues;
-    }
+//    private void insertMovieIntoDatabase(){
+//
+//        ContentValues contentValues = parseMovieIntoContentValues();
+//
+//        Uri uri = getContentResolver().insert(FavoriteListContract.FavoriteEntry.CONTENT_URI, contentValues);
+//
+//        if(uri != null){
+//            String addedFavoriteMovieToastMessage = getString(R.string.add_favorite_movie_toast_message);
+//            Toast.makeText(getBaseContext(),
+//                    addedFavoriteMovieToastMessage
+//                    , Toast.LENGTH_LONG).show();
+//
+//        }else {
+//            finish();
+//        }
+//    }
+//
+//    private ContentValues parseMovieIntoContentValues() {
+//
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE, movie.getOriginalTitle());
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL, movie.getPosterPath());
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_SYNOPSIS, movie.getOverview());
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
+//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING, movie.getVoteAverage());
+//
+//        return contentValues;
 }
+
 

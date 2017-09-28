@@ -1,9 +1,20 @@
 package com.example.brenda.popularmovies.models;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.brenda.popularmovies.data.FavoriteListContract;
 import com.google.gson.annotations.SerializedName;
+
+import static android.R.attr.id;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_RELEASE_DATE;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_SYNOPSIS;
+import static com.example.brenda.popularmovies.data.FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING;
 
 /**
  * Created by brenda on 8/28/17.
@@ -11,21 +22,19 @@ import com.google.gson.annotations.SerializedName;
 
 public class Movie implements Parcelable {
 
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
     @SerializedName("id")
     private long id;
-
-    @Override
-    public String toString() {
-        return "Movie{" +
-                "id=" + id +
-                ", posterPath='" + posterPath + '\'' +
-                ", originalTitle='" + originalTitle + '\'' +
-                ", overview='" + overview + '\'' +
-                ", voteAverage=" + voteAverage +
-                ", releaseDate='" + releaseDate + '\'' +
-                '}';
-    }
-
     @SerializedName("poster_path")
     private String posterPath;
 
@@ -53,17 +62,37 @@ public class Movie implements Parcelable {
     public Movie() {
     }
 
-    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
-        @Override
-        public Movie createFromParcel(Parcel in) {
-            return new Movie(in);
-        }
+    public Movie(long id, String posterPath, String originalTitle, String overview, double voteAverage, String releaseDate) {
+        this.id = id;
+        this.posterPath = posterPath;
+        this.originalTitle = originalTitle;
+        this.overview = overview;
+        this.voteAverage = voteAverage;
+        this.releaseDate = releaseDate;
+    }
 
-        @Override
-        public Movie[] newArray(int size) {
-            return new Movie[size];
-        }
-    };
+    public static Movie parseCursorToMovie(Cursor cursor) {
+        String overview = cursor.getString(cursor.getColumnIndex(COLUMN_SYNOPSIS));
+        String releaseDate = cursor.getString(cursor.getColumnIndex(COLUMN_RELEASE_DATE));
+        long id = cursor.getInt(cursor.getColumnIndex(COLUMN_MOVIE_ID));
+        String originalTitle = cursor.getString(cursor.getColumnIndex(COLUMN_MOVIE_TITLE));
+        String thumbnailPath = cursor.getString(cursor.getColumnIndex(COLUMN_MOVIE_THUMBNAIL_URL));
+        Double voteAverage = cursor.getDouble(cursor.getColumnIndex(COLUMN_USER_RATING));
+
+        return new Movie(id, thumbnailPath, originalTitle, overview, voteAverage, releaseDate);
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", posterPath='" + posterPath + '\'' +
+                ", originalTitle='" + originalTitle + '\'' +
+                ", overview='" + overview + '\'' +
+                ", voteAverage=" + voteAverage +
+                ", releaseDate='" + releaseDate + '\'' +
+                '}';
+    }
 
     public String getPosterPath() {
         return posterPath;
@@ -126,5 +155,17 @@ public class Movie implements Parcelable {
         dest.writeDouble(voteAverage);
         dest.writeString(releaseDate);
         dest.writeLong(id);
+    }
+
+    public ContentValues toFavoritesContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID, this.id);
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL, this.posterPath);
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE, this.originalTitle);
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_SYNOPSIS, this.overview);
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_RELEASE_DATE, this.releaseDate);
+        values.put(FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING, this.voteAverage);
+
+        return values;
     }
 }
