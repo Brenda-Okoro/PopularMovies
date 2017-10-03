@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -49,6 +50,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private FloatingActionButton mMarkAsFavorite;
     private NestedScrollView scrollView;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private CoordinatorLayout coordinatorLayout;
     boolean isCurrentMovieFavourite = false;
 
     @Override
@@ -126,6 +128,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void initViews() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        coordinatorLayout = (CoordinatorLayout) findViewById (R.id.coordinate_layout);
         mReleaseDate = (TextView) findViewById(R.id.tv_movie_language_date);
         mOriginalTitle = (TextView) findViewById(R.id.movie_title);
         mMovieRating = (TextView) findViewById(R.id.movie_ratings);
@@ -196,35 +199,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             return NUM_PAGES;
         }
     }
-
-//    private void insertMovieIntoDatabase(){
-//
-//        ContentValues contentValues = parseMovieIntoContentValues();
-//
-//        Uri uri = getContentResolver().insert(FavoriteListContract.FavoriteEntry.CONTENT_URI, contentValues);
-//
-//        if(uri != null){
-//            String addedFavoriteMovieToastMessage = getString(R.string.add_favorite_movie_toast_message);
-//            Toast.makeText(getBaseContext(),
-//                    addedFavoriteMovieToastMessage
-//                    , Toast.LENGTH_LONG).show();
-//
-//        }else {
-//            finish();
-//        }
-//    }
-//
-//    private ContentValues parseMovieIntoContentValues() {
-//
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_ID, movie.getId());
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_TITLE, movie.getOriginalTitle());
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_MOVIE_THUMBNAIL_URL, movie.getPosterPath());
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_SYNOPSIS, movie.getOverview());
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_RELEASE_DATE, movie.getReleaseDate());
-//        contentValues.put(FavoriteListContract.FavoriteEntry.COLUMN_USER_RATING, movie.getVoteAverage());
-//
-//        return contentValues;
 }
 
 

@@ -14,6 +14,7 @@ import rx.Observable;
  */
 
 public interface MovieService {
+
     @GET("movie/popular")
     Observable<MovieListResponse> getPopularMovies(@Query("api_key") String apiKey);
 

@@ -1,8 +1,11 @@
 package com.example.brenda.popularmovies.activities;
 
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -46,15 +49,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String KEY_ACTION_BAR_TITLE = "title";
     private static final String KEY_FAVORITE_MOVIE_CURSOR = "cursor";
     public static final int LOADER_ID = 100;
-
     private static final String TAG = MainActivity.class.getSimpleName();
     private MovieAdapter mAdapter;
     private FavoriteMovieAdapter mFavoriteMovieAdapter;
+    private static final String POSITION = "position";
+    private static final String TOP_VIEW = "top_view";
     private RecyclerView mMovieList;
     private ProgressBar progressBar;
+    private GridLayoutManager layoutManager;
     private AlertDialog alertDialog;
     private Subscription subscription;
     private TextView mErrorMessageTextView;
+    private int positionIndex = -1;
+    private int topView = -1;
     private List<Movie> movies;
 
     @Override
@@ -62,8 +69,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mErrorMessageTextView = (TextView) findViewById(R.id.tv_error_message);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         mMovieList = (RecyclerView) findViewById(R.id.rv_images);
-        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        layoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mMovieList.setLayoutManager(layoutManager);
         mMovieList.setHasFixedSize(true);
         mAdapter = new MovieAdapter(new MovieAdapter.ListItemClickListener() {
@@ -76,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         }, this, new ArrayList<Movie>(0));
         mMovieList.setAdapter(mAdapter);
-
         mFavoriteMovieAdapter = new FavoriteMovieAdapter(null,
                 new FavoriteMovieAdapter.ListItemClickListener() {
                     @Override
@@ -93,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if (!isPhoneConnectedToInternet()) {
             showMessage(R.string.no_network_message);
+
         } else {
 
             if (actionBarTitleWasSaved(savedInstanceState)) {
@@ -100,7 +108,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 setActionBarTitle(actionBarTitle);
             }
             if (savedInstanceState != null) {
-
+                positionIndex = savedInstanceState.getInt(POSITION);
+                topView = savedInstanceState.getInt(TOP_VIEW);
+//                    if (savedInstanceState.containsKey(getString(R.string.movie_poster_data_key))) {
+//                        movies = savedInstanceState.getParcelableArrayList(getString(R.string.movie_poster_data_key));
+//                        mAdapter.setData(movies);
+//                    }
             } else {
                 showMovies(MovieFilter.POPULAR);
             }
@@ -109,6 +122,31 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(POSITION,positionIndex);
+        outState.putInt(TOP_VIEW,topView);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        positionIndex= layoutManager.findFirstVisibleItemPosition();
+        View startView = mMovieList.getChildAt(0);
+        topView = (startView == null) ? 0 : (startView.getTop() - mMovieList.getPaddingTop());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (positionIndex!= -1) {
+            layoutManager.scrollToPositionWithOffset(positionIndex, topView);
+        }
+
+    }
+
+
     private boolean favoriteMovieCursorWasSaved(Bundle savedInstanceState) {
         return savedInstanceState != null && savedInstanceState.containsKey(KEY_FAVORITE_MOVIE_CURSOR);
     }
@@ -116,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -128,10 +165,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_by_most_popular:
+                String popularMovies = getString(R.string.sort_by_most_popular);
                 showMovies(MovieFilter.POPULAR);
+                setActionBarTitle(popularMovies);
                 return true;
             case R.id.sort_by_highest_rated:
+                String highRatedMovies = getString(R.string.sort_by_highest_rated);
                 showMovies(MovieFilter.HIGH_RATED);
+                setActionBarTitle(highRatedMovies);
                 return true;
             case R.id.sort_by_favorite:
                 sortMoviesByFavorite();
