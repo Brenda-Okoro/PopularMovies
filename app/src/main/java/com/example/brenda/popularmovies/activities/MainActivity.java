@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mErrorMessageTextView = (TextView) findViewById(R.id.tv_error_message);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         mMovieList = (RecyclerView) findViewById(R.id.rv_images);
         layoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mMovieList.setLayoutManager(layoutManager);
@@ -84,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         }, this, new ArrayList<Movie>(0));
         mMovieList.setAdapter(mAdapter);
+
         mFavoriteMovieAdapter = new FavoriteMovieAdapter(null,
                 new FavoriteMovieAdapter.ListItemClickListener() {
                     @Override
@@ -110,10 +110,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             if (savedInstanceState != null) {
                 positionIndex = savedInstanceState.getInt(POSITION);
                 topView = savedInstanceState.getInt(TOP_VIEW);
-//                    if (savedInstanceState.containsKey(getString(R.string.movie_poster_data_key))) {
-//                        movies = savedInstanceState.getParcelableArrayList(getString(R.string.movie_poster_data_key));
-//                        mAdapter.setData(movies);
-//                    }
             } else {
                 showMovies(MovieFilter.POPULAR);
             }
@@ -125,14 +121,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(POSITION,positionIndex);
-        outState.putInt(TOP_VIEW,topView);
+        outState.putInt(POSITION, positionIndex);
+        outState.putInt(TOP_VIEW, topView);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        positionIndex= layoutManager.findFirstVisibleItemPosition();
+        positionIndex = layoutManager.findFirstVisibleItemPosition();
         View startView = mMovieList.getChildAt(0);
         topView = (startView == null) ? 0 : (startView.getTop() - mMovieList.getPaddingTop());
     }
@@ -140,12 +136,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onResume() {
         super.onResume();
-        if (positionIndex!= -1) {
+        if (positionIndex != -1) {
             layoutManager.scrollToPositionWithOffset(positionIndex, topView);
         }
 
     }
-
 
     private boolean favoriteMovieCursorWasSaved(Bundle savedInstanceState) {
         return savedInstanceState != null && savedInstanceState.containsKey(KEY_FAVORITE_MOVIE_CURSOR);
@@ -154,12 +149,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_option_menu, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
